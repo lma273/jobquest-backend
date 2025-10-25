@@ -6,8 +6,11 @@ FROM maven:3.9.6-eclipse-temurin-17 AS builder
 # Đặt đúng thư mục có pom.xml
 WORKDIR /app
 
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
 # Copy toàn bộ project con vào container
-COPY jobquestbackend/ .
+COPY . .
 
 # Build application (skip tests)
 RUN mvn clean package -DskipTests
@@ -26,3 +29,4 @@ COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
