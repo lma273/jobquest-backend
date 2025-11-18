@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/candidates")
+@RequestMapping("/candidates")
 // Có thể bỏ @CrossOrigin ở đây nếu bạn đã cấu hình CORS global trong SecurityConfig
 @CrossOrigin(origins = "*")
 public class CandidateController {

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/v1/recruiters")
+@RequestMapping("/recruiters")
 // Có thể bỏ @CrossOrigin ở đây nếu đã cấu hình CORS global
 public class RecruiterController {
 

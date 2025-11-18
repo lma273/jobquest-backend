@@ -93,22 +93,22 @@ public class SecurityConfig {
                 .requestMatchers("/", "/error").permitAll()
     
                 // Auth APIs
-                .requestMatchers("/api/v1/auth/**").permitAll()
+                .requestMatchers("/auth/**").permitAll()
     
                 // Recruiter & Candidate public APIs
-                .requestMatchers("/api/v1/recruiters/login", "/api/v1/recruiters/signup").permitAll()
-                .requestMatchers("/api/v1/candidates/login", "/api/v1/candidates/signup").permitAll()
+                .requestMatchers("/recruiters/login", "/recruiters/signup").permitAll()
+                .requestMatchers("/candidates/login", "/candidates/signup").permitAll()
     
                 // Nếu controller thật sự dùng /register thay vì /signup → permit cái này
-                .requestMatchers("/api/v1/recruiters/register", "/api/v1/candidates/register").permitAll()
+                .requestMatchers("/recruiters/register", "/candidates/register").permitAll()
     
                 // Public GET
-                .requestMatchers(HttpMethod.GET, "/api/v1/jobs/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/applications/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/jobs/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/applications/**").permitAll()
     
                 // ========= PROTECTED ROUTES =========
-                .requestMatchers("/api/v1/applications/**").authenticated()
-                .requestMatchers("/api/v1/recruiters/logout", "/api/v1/candidates/logout").authenticated()
+                .requestMatchers("/applications/**").authenticated()
+                .requestMatchers("/recruiters/logout", "/candidates/logout").authenticated()
     
                 // ========= FALLBACK =========
                 .anyRequest().authenticated()

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/jobs")
+@RequestMapping("/jobs")
 // @CrossOrigin(origins = "https://job-quest-client.vercel.app")
 @CrossOrigin(origins = "*") // tạm thời
 
