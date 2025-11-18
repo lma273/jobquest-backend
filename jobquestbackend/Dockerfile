@@ -6,6 +6,7 @@ FROM maven:3.9.6-eclipse-temurin-17 AS builder
 # Đặt đúng thư mục có pom.xml
 WORKDIR /app
 
+
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 
@@ -21,7 +22,6 @@ RUN mvn clean package -DskipTests
 # =============================
 FROM eclipse-temurin:17-jdk-alpine
 
-
 WORKDIR /app
 
 RUN apk add --no-cache ca-certificates && update-ca-certificates
@@ -32,6 +32,3 @@ COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
-
-
-
