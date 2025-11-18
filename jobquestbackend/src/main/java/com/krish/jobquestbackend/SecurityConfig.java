@@ -81,34 +81,45 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(c -> c.configurationSource(corsConfigurationSource()))
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                .authorizeHttpRequests(auth -> auth
-                        // public: SSO + local login/register
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/candidates/login", "/api/v1/candidates/signup").permitAll()
-                        .requestMatchers("/api/v1/recruiters/login", "/api/v1/recruiters/signup").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/applications/**").permitAll()
-
-
-                        // public data bạn muốn cho khách xem:
-                        .requestMatchers(HttpMethod.GET, "/api/v1/jobs/**").permitAll()
-
-                        // các API cần đăng nhập
-                        .requestMatchers("/api/v1/applications/**").authenticated()
-                        .requestMatchers("/api/v1/recruiters/logout", "/api/v1/candidates/logout").authenticated()
-
-                        // còn lại
-                        .anyRequest().authenticated()
-                )
-
-                // đính filter đọc JWT **trước** UsernamePasswordAuthenticationFilter
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
+            .cors(c -> c.configurationSource(corsConfigurationSource()))
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+    
+            .authorizeHttpRequests(auth -> auth
+    
+                // ========= PUBLIC ROUTES =========
+    
+                // cho phép React SPA gọi backend mà không bị chặn
+                .requestMatchers("/", "/error").permitAll()
+    
+                // Auth APIs
+                .requestMatchers("/api/v1/auth/**").permitAll()
+    
+                // Recruiter & Candidate public APIs
+                .requestMatchers("/api/v1/recruiters/login", "/api/v1/recruiters/signup").permitAll()
+                .requestMatchers("/api/v1/candidates/login", "/api/v1/candidates/signup").permitAll()
+    
+                // Nếu controller thật sự dùng /register thay vì /signup → permit cái này
+                .requestMatchers("/api/v1/recruiters/register", "/api/v1/candidates/register").permitAll()
+    
+                // Public GET
+                .requestMatchers(HttpMethod.GET, "/api/v1/jobs/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/applications/**").permitAll()
+    
+                // ========= PROTECTED ROUTES =========
+                .requestMatchers("/api/v1/applications/**").authenticated()
+                .requestMatchers("/api/v1/recruiters/logout", "/api/v1/candidates/logout").authenticated()
+    
+                // ========= FALLBACK =========
+                .anyRequest().authenticated()
+            )
+    
+            // JWT filter
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+    
         return http.build();
     }
+
 }
 
 // package com.krish.jobquestbackend;
