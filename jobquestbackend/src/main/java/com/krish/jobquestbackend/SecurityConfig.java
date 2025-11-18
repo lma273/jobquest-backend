@@ -62,11 +62,15 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
-        cfg.setAllowedOrigins(List.of("http://localhost:*",
+        cfg.setAllowedOriginPatterns(List.of(
+                "http://localhost:*",
                 "http://127.0.0.1:*",
                 "http://*.local",
-                "http://frontend-service",  // cho call nội bộ K8s
-                "https://jobquest-frontend.pages.dev"));
+                "http://frontend-service",
+                "https://jobquest-frontend.pages.dev",
+                "https://*.nip.io"
+        ));
+
         cfg.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
         cfg.setAllowedHeaders(List.of("*"));
         cfg.setAllowCredentials(true);
