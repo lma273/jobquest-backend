@@ -63,12 +63,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
         cfg.setAllowedOriginPatterns(List.of(
-                "http://localhost:*",
-                "http://127.0.0.1:*",
-                "http://*.local",
-                "http://frontend-service",
-                "https://jobquest.duckdns.org",
-                "https://*.nip.io"
+                "https://jobquest-ptud.site",
+                "https://www.jobquest-ptud.site",
+                "http://localhost:8081"
         ));
 
         cfg.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
