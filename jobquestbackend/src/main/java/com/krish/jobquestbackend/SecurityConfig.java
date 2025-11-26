@@ -67,7 +67,7 @@ public class SecurityConfig {
                 "http://127.0.0.1:*",
                 "http://*.local",
                 "http://frontend-service",
-                "https://jobquest-frontend.pages.dev",
+                "https://jobquest.duckdns.org",
                 "https://*.nip.io"
         ));
 
