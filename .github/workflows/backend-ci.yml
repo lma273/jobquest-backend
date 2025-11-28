@@ -32,6 +32,7 @@ jobs:
     # 5️⃣ Build & Push Backend Image
     - name: Build & Push Backend
       run: |
+        cd jobquestbackend
         IMAGE=asia-southeast1-docker.pkg.dev/jobquest-ptud-hai/jobquest-repo/backend:v17
         docker build -t $IMAGE .
         docker push $IMAGE
