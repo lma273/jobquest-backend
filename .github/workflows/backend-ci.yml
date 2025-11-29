@@ -8,7 +8,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
+      # Thêm quyền actions: write để cho phép kích hoạt sự kiện
+      actions: write
     steps:
     # 1️⃣ Checkout source code
     - name: Checkout code
