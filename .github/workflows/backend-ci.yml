@@ -33,6 +33,20 @@ jobs:
     - name: Build & Push Backend
       run: |
         cd jobquestbackend
-        IMAGE=asia-southeast1-docker.pkg.dev/jobquest-ptud-hai/jobquest-repo/backend:v17
+        IMAGE=asia-southeast1-docker.pkg.dev/jobquest-ptud-hai/jobquest-repo/backend:${GITHUB_SHA}
         docker build -t $IMAGE .
         docker push $IMAGE
+
+    # Trigger k8s repo workflow
+    - name: Trigger k8s workflow
+      uses: peter-evans/repository-dispatch@v2
+      with:
+        token: ${{ secrets.PAT }}
+        repository: lma273/jobquest-k8s
+        event-type: update-deploy
+        client-payload: |
+          {
+          "backend_tag": "${{ github.sha }}"
+          }
+
+        
