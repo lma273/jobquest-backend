@@ -36,7 +36,7 @@ jobs:
     - name: Build & Push Backend
       run: |
         cd jobquestbackend
-        IMAGE=asia-southeast1-docker.pkg.dev/jobquest-ptud-hai/jobquest-repo/backend:${GITHUB_SHA}
+        IMAGE=asia-southeast1-docker.pkg.dev/jobquest-ptud-hai-481413/jobquest-repo/backend:${GITHUB_SHA}
         docker build -t $IMAGE .
         docker push $IMAGE
 
