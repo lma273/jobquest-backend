@@ -35,7 +35,7 @@ except Exception as e:
     print(f"❌ Lỗi kết nối MongoDB: {e}")
 
 # --- 3. CẤU HÌNH AI (OpenRouter) ---
-OPENROUTER_API_KEY = "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"
+OPENROUTER_API_KEY = "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"
 # OPENROUTER_API_KEY = "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"
 
 client_llm = OpenAI(
