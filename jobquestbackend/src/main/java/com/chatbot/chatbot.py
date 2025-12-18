@@ -135,16 +135,73 @@ async def get_real_jobs():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# --- API 3: CHATBOT TƯ VẤN THÔNG THƯỜNG (CŨ) ---
+
+# --- Cập nhật Data Model (Thêm mode có default value để không lỗi frontend) ---
 class ConsultRequest(BaseModel):
     cv_text: str
     job_context: str
     user_question: str
+    mode: str = "candidate"  # Mặc định là ứng viên nếu frontend không gửi
 
+# --- API 4: CHATBOT CONSULTANT (ĐÃ SỬA LOGIC THẬT) ---
 @app.post("/consult")
-async def consult_text_only(req: ConsultRequest):
-    # Logic cũ cho trường hợp chat text
-    # ... (Giữ nguyên logic cũ nếu muốn dùng song song)
-    return {"response": "Tính năng chat text vẫn hoạt động."}
+async def ai_consultant(req: ConsultRequest):
+    """
+    API tư vấn nghề nghiệp thông minh.
+    Nhận: Text CV, Ngữ cảnh Job, Câu hỏi.
+    Trả về: Lời khuyên từ AI.
+    """
+    
+    # 1. Chọn vai trò (Persona) cho AI
+    if req.mode == "candidate":
+        system_prompt = """
+        Bạn là Chuyên gia Tư vấn Nghề nghiệp (Career Coach) tận tâm và sắc sảo.
+        Nhiệm vụ: Phân tích mức độ phù hợp giữa Hồ sơ năng lực (CV) và Mô tả công việc (JD).
+        Phong cách:
+        - Trả lời ngắn gọn, súc tích (dưới 300 từ).
+        - Giọng điệu khích lệ nhưng trung thực.
+        - Chỉ rõ các kỹ năng còn thiếu (Skill Gap) nếu có.
+        - Đưa ra lời khuyên phỏng vấn cụ thể.
+        """
+    else:
+        # Dành cho tương lai nếu bạn làm tính năng cho Recruiter
+        system_prompt = """
+        Bạn là Trợ lý Tuyển dụng (HR Assistant).
+        Nhiệm vụ: Đánh giá nhanh ứng viên này có tiềm năng không.
+        Phong cách: Khách quan, tập trung vào rủi ro và đánh giá năng lực cốt lõi.
+        """
 
+    # 2. Tạo ngữ cảnh (Context) để gửi cho AI
+    # Kết hợp thông tin Job, CV và câu hỏi người dùng
+    user_prompt = f"""
+    === THÔNG TIN CÔNG VIỆC (JD) ===
+    {req.job_context}
+    
+    === HỒ SƠ ỨNG VIÊN (CV) ===
+    {req.cv_text[:3000]}  # Giới hạn 3000 ký tự để tiết kiệm token
+    
+    === CÂU HỎI CỦA NGƯỜI DÙNG ===
+    "{req.user_question}"
+    
+    Hãy trả lời câu hỏi trên bằng tiếng Việt.
+    """
+
+    try:
+        # 3. Gọi OpenRouter (AI Model)
+        completion = client_llm.chat.completions.create(
+            model="meta-llama/llama-3.3-70b-instruct:free", # Model miễn phí và rất thông minh
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            max_tokens=800, # Độ dài câu trả lời tối đa
+            temperature=0.7 # Độ sáng tạo (0.7 là mức cân bằng)
+        )
+        
+        # 4. Trả kết quả về Frontend
+        return {"response": completion.choices[0].message.content}
+    
+    except Exception as e:
+        print(f"Lỗi AI: {str(e)}")
+        return {"response": "Xin lỗi, hệ thống AI đang bận. Bạn vui lòng thử lại sau giây lát."}
 # Run server: uvicorn chatbot:app --reload
