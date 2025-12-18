@@ -32,21 +32,21 @@ public class NotificationController {
     }
 
     // Lấy tất cả notifications của user
-    @GetMapping("/{userId}")
+    @GetMapping("/{userId:.+}")
     public ResponseEntity<List<Notification>> getUserNotifications(@PathVariable String userId) {
         List<Notification> notifications = notificationService.getUserNotifications(userId);
         return new ResponseEntity<>(notifications, HttpStatus.OK);
     }
 
     // Lấy unread notifications
-    @GetMapping("/{userId}/unread")
+    @GetMapping("/{userId:.+}/unread")
     public ResponseEntity<List<Notification>> getUnreadNotifications(@PathVariable String userId) {
         List<Notification> notifications = notificationService.getUnreadNotifications(userId);
         return new ResponseEntity<>(notifications, HttpStatus.OK);
     }
 
     // Đếm số unread
-    @GetMapping("/{userId}/unread/count")
+    @GetMapping("/{userId:.+}/unread/count")
     public ResponseEntity<Map<String, Long>> getUnreadCount(@PathVariable String userId) {
         long count = notificationService.getUnreadCount(userId);
         return new ResponseEntity<>(Map.of("count", count), HttpStatus.OK);
@@ -60,7 +60,7 @@ public class NotificationController {
     }
 
     // Đánh dấu tất cả đã đọc
-    @PostMapping("/{userId}/read-all")
+    @PostMapping("/{userId:.+}/read-all")
     public ResponseEntity<String> markAllAsRead(@PathVariable String userId) {
         notificationService.markAllAsRead(userId);
         return new ResponseEntity<>("All notifications marked as read", HttpStatus.OK);
