@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.http.MediaType; // Import này quan trọng
+import org.springframework.web.multipart.MultipartFile; // Import này quan trọng
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +23,31 @@ public class JobApplicationController {
 
     @Autowired
     private JobApplicationService jobApplicationService;
+
+    // Sửa phương thức POST để nhận MultipartFile
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<JobApplication> createJobApplication(
+            @RequestParam("resume") MultipartFile resume, // Nhận file PDF
+            @RequestParam("jobId") String jobId,
+            @RequestParam("userId") String userId,
+            @RequestParam("name") String name,
+            @RequestParam("email") String email,
+            @RequestParam("phone") String phone,
+            @RequestParam("qualification") String qualification,
+            @RequestParam("status") String status,
+            // Nhận list skills (Frontend gửi nhiều dòng skills thì Spring tự gom vào List)
+            @RequestParam(value = "skills", required = false) List<String> skills 
+    ) {
+        try {
+            // Gọi Service để xử lý lưu file và lưu vào DB
+            JobApplication newApplication = jobApplicationService.createJobApplicationWithFile(
+                    resume, jobId, userId, name, email, phone, qualification, status, skills
+            );
+            return new ResponseEntity<>(newApplication, HttpStatus.CREATED);
+        } catch (IOException e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     @GetMapping
     public ResponseEntity<List<JobApplication>> getAllJobApplications() {

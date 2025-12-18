@@ -26,6 +26,7 @@ public class JobApplication {
     private String status;
     private List<String> skills;
     private ObjectId jobId;
+    private ObjectId userId;  // ID ứng viên (Thêm mới)
 
     public JobApplication(String name, String email, String phone, String qualification, String resumeLink, String status, List<String> skills, ObjectId jobId) {
         this.name = name;
@@ -36,6 +37,20 @@ public class JobApplication {
         this.status = status;
         this.skills = skills;
         this.jobId = jobId;
+    }
+    // Cập nhật Constructor thủ công để bao gồm userId
+    public JobApplication(String name, String email, String phone, String qualification, 
+                          String resumeLink, String status, List<String> skills, 
+                          ObjectId jobId, ObjectId userId) {
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.qualification = qualification;
+        this.resumeLink = resumeLink;
+        this.status = status;
+        this.skills = skills;
+        this.jobId = jobId;
+        this.userId = userId;
     }
 
     public void setStatus(String status) {
@@ -50,5 +65,9 @@ public class JobApplication {
     @JsonProperty("jobId")
     public String getJobIdString() {
         return jobId != null ? jobId.toHexString() : null;
+    }
+    @JsonProperty("userId")
+    public String getUserIdString() {
+        return userId != null ? userId.toHexString() : null;
     }
 }
