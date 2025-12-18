@@ -23,6 +23,7 @@ public class Job {
     private String experience;
     private String description;
     private List<String> skills;
+    private String jobType; // Full-time, Part-time, Remote, Internship
     //hant
     private String recruiterEmail; // Thêm trường recruiterEmail
 
