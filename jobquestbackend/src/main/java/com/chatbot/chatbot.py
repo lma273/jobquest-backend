@@ -15,7 +15,12 @@ app = FastAPI(title="JobQuest AI Backend")
 # --- 1. CẤU HÌNH CORS (Để Frontend React gọi được) ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Trong production nên đổi thành domain cụ thể
+    allow_origins=[
+        "*",
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://lakeisha-unhumorous-histographically.ngrok-free.dev"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
