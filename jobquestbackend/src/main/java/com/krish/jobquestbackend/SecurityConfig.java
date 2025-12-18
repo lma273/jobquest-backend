@@ -106,7 +106,10 @@ public class SecurityConfig {
                 // Public GET
                 .requestMatchers(HttpMethod.GET, "/jobs/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/applications/**").permitAll()
-    
+                
+                // File uploads/downloads - cho phép tải CV
+                .requestMatchers("/uploads/**").permitAll()
+
                 // ========= PROTECTED ROUTES =========
                 .requestMatchers("/applications/**").authenticated()
                 .requestMatchers("/recruiters/logout", "/candidates/logout").authenticated()
