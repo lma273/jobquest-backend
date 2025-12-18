@@ -19,7 +19,7 @@ public class JobApplicationService {
     private JobApplicationRepository jobApplicationRepository;
 
     // Đường dẫn folder lưu file (Bạn có thể đổi thành cấu hình trong application.properties)
-    private final Path fileStorageLocation = Paths.get("uploads").toAbsolutePath().normalize();
+    private final Path fileStorageLocation = Paths.get("/app/uploads").toAbsolutePath().normalize();
 
     public JobApplicationService() {
         try {

@@ -17,7 +17,7 @@ import java.nio.file.Paths;
 @CrossOrigin(origins = "*")
 public class FileController {
 
-    private final Path fileStorageLocation = Paths.get("uploads").toAbsolutePath().normalize();
+    private final Path fileStorageLocation = Paths.get("/app/uploads").toAbsolutePath().normalize();
 
     @GetMapping("/{fileName:.+}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String fileName) {
