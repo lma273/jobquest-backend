@@ -40,7 +40,7 @@ except Exception as e:
     print(f"❌ Lỗi kết nối MongoDB: {e}")
 
 # --- 3. CẤU HÌNH AI (OpenRouter) ---
-OPENROUTER_API_KEY = "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"
+OPENROUTER_API_KEY = "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"
 # OPENROUTER_API_KEY = "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"
 
 client_llm = OpenAI(
@@ -282,4 +282,103 @@ async def generate_jd_ai(req: JDGenRequest):
         return {"jd_content": completion.choices[0].message.content}
     except Exception as e:
         return {"jd_content": f"Lỗi AI: {str(e)}"}
+
+# --- API 6: CV MATCHING - SẮP XẾP TẤT CẢ JOB THEO ĐỘ PHÙ HỢP ---
+@app.post("/find_matches")
+async def find_matches(file: UploadFile = File(...)):
+    """
+    Upload CV (PDF) và tính điểm phù hợp cho TẤT CẢ jobs.
+    Sử dụng AI để tính toán độ phù hợp dựa trên nội dung.
+    Trả về: CV text + TẤT CẢ jobs kèm điểm match (đã sắp xếp theo độ phù hợp).
+    """
+    try:
+        # 1. Đọc PDF và extract text
+        cv_text = await extract_text_from_pdf(file)
+        
+        if len(cv_text) < 50:
+            raise HTTPException(status_code=400, detail="Cannot extract text from PDF or file is too short")
+        
+        # 2. Lấy TẤT CẢ jobs từ MongoDB
+        jobs_cursor = jobs_collection.find()
+        all_jobs = []
+        for job in jobs_cursor:
+            job["id"] = str(job.pop("_id"))
+            all_jobs.append(job)
+        
+        if not all_jobs:
+            return {
+                "cv_text": cv_text,
+                "matches": [],
+                "message": "Không có công việc nào trong hệ thống"
+            }
+        
+        # 3. Tính điểm phù hợp cho TẤT CẢ jobs
+        matches_with_scores = []
+        
+        for job in all_jobs:
+            job_context = f"""
+            Vị trí: {job.get('position', job.get('title', 'N/A'))}
+            Công ty: {job.get('company', 'N/A')}
+            Mô tả: {job.get('desc', job.get('description', 'N/A'))[:500]}
+            Yêu cầu: {job.get('requirements', 'N/A')[:500]}
+            """
+            
+            # Gọi AI để đánh giá độ phù hợp
+            try:
+                prompt = f"""
+                Đánh giá độ phù hợp giữa CV và JD (cho điểm từ 0-100).
+                Chỉ trả về 1 số duy nhất, không giải thích.
+                
+                CV: {cv_text[:1000]}
+                JD: {job_context}
+                
+                Điểm (0-100):
+                """
+                
+                completion = client_llm.chat.completions.create(
+                    model="meta-llama/llama-3.3-70b-instruct:free",
+                    messages=[{"role": "user", "content": prompt}],
+                    max_tokens=10,
+                    temperature=0.3
+                )
+                
+                score_text = completion.choices[0].message.content.strip()
+                # Extract số từ response
+                import re
+                score_match = re.search(r'\d+', score_text)
+                score = int(score_match.group()) if score_match else 50
+                score = min(100, max(0, score))  # Đảm bảo trong khoảng 0-100
+                
+                matches_with_scores.append({
+                    "job": job,
+                    "score": score / 100.0  # Chuyển về scale 0-1
+                })
+            except:
+                # Nếu AI lỗi, cho điểm mặc định 0.5
+                matches_with_scores.append({
+                    "job": job,
+                    "score": 0.5
+                })
+        
+        # 4. Sắp xếp TẤT CẢ jobs theo điểm giảm dần (phù hợp nhất lên đầu)
+        matches_with_scores.sort(key=lambda x: x["score"], reverse=True)
+        
+        # 5. Format kết quả - TRẢ VỀ TẤT CẢ
+        results = []
+        for item in matches_with_scores:
+            results.append({
+                "id": item["job"]["id"],
+                "score": round(item["score"], 4),
+                "data": item["job"]
+            })
+        
+        return {
+            "cv_text": cv_text,
+            "matches": results,
+            "total": len(results)
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing CV: {str(e)}")
+
 # Run server: uvicorn chatbot:app --reload
