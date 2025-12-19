@@ -40,7 +40,6 @@ except Exception as e:
     print(f"❌ Lỗi kết nối MongoDB: {e}")
 
 # --- 3. CẤU HÌNH AI (OpenRouter) ---
-OPENROUTER_API_KEY = "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"
 # OPENROUTER_API_KEY = "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"
 
 client_llm = OpenAI(
@@ -253,6 +252,8 @@ async def ai_consultant(req: ConsultRequest):
 # --- Cập nhật Data Model ---
 class JDGenRequest(BaseModel):
     rough_input: str # Ví dụ: "Cần tuyển React dev, 2 năm kn, lương 1000$, làm ở Cầu Giấy"
+    job_title: Optional[str] = None  # Tên công việc từ form
+    experience: Optional[str] = None  # Số năm kinh nghiệm từ form
 
 # --- API 5 (Viết lại): AI GEN JD TỪ YÊU CẦU SƠ SÀI ---
 @app.post("/generate_jd")
@@ -260,17 +261,32 @@ async def generate_jd_ai(req: JDGenRequest):
     """
     Biến yêu cầu sơ sài của HR thành JD chuyên nghiệp.
     """
+    # Xây dựng context từ thông tin đã có
+    context_parts = []
+    if req.job_title:
+        context_parts.append(f"Vị trí tuyển dụng: {req.job_title}")
+    if req.experience:
+        context_parts.append(f"Kinh nghiệm yêu cầu: {req.experience}")
+    
+    context = "\n".join(context_parts) if context_parts else ""
+    
     prompt = f"""
-    Bạn là HR Manager cao cấp. Hãy viết lại bản Mô tả công việc (JD) chuyên nghiệp dựa trên các ghi chú thô sau:
+    Bạn là HR Manager cao cấp. Hãy viết lại bản Mô tả công việc (JD) chuyên nghiệp dựa trên thông tin sau:
+    
+    {context}
+    
+    Yêu cầu bổ sung từ HR:
     "{req.rough_input}"
     
     Yêu cầu đầu ra (Markdown):
-    1. Tiêu đề công việc (Gợi ý một tiêu đề hấp dẫn)
-    2. Mô tả công việc (Viết lại văn phong chuyên nghiệp)
-    3. Yêu cầu (Phân tích từ ghi chú thô để suy ra kỹ năng cần thiết)
-    4. Quyền lợi (Nếu trong ghi chú không có, hãy gợi ý các quyền lợi tiêu chuẩn ngành IT)
+    1. Tiêu đề công việc: {req.job_title if req.job_title else "(Gợi ý một tiêu đề hấp dẫn dựa trên yêu cầu)"}
+    2. Mô tả công việc: Viết lại văn phong chuyên nghiệp, mở rộng từ yêu cầu thô
+    3. Yêu cầu công việc: 
+       - Kinh nghiệm: {req.experience if req.experience else "(Phân tích từ ghi chú thô)"}
+       - Kỹ năng: (Phân tích từ ghi chú thô để suy ra kỹ năng cần thiết)
+    4. Quyền lợi: (Nếu trong ghi chú không có, hãy gợi ý các quyền lợi tiêu chuẩn ngành IT)
     
-    Hãy viết bằng tiếng Việt, giọng văn thu hút.
+    Hãy viết bằng tiếng Việt, giọng văn thu hút, chuyên nghiệp.
     """
     
     try:
